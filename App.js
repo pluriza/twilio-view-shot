@@ -13,24 +13,6 @@ import { captureScreen } from 'react-native-view-shot';
 
 const log = message => (...data) => console.log(message, ...data);
 
-const getAccessToken = async (identity, room) => {
-  try {
-    const responseData = await fetch('/* url redacted */', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ identity, room }),
-    });
-    const responseJson = await responseData.json();
-    return responseJson.body;
-  } catch (error) {
-    console.error('getAccessToken', error);
-    return null;
-  }
-};
-
 export default class App extends Component {
 
   state = {
@@ -94,18 +76,27 @@ export default class App extends Component {
     });
   };
 
-  startCall = async () => {
+  // accessToken FROM YOUR TWILIO ACCOUNT https://www.twilio.com/console/video/runtime/testing-tools
+  // When creating the access tokens Set Choose your Room Name as room
+  startCall = async (roomName, accessToken) => {
     try {
-      let id = "";
-      for (let i = 0; i < 10; i++) {
-        id += String.fromCharCode(65 + Math.floor((90 - 65) * Math.random()));
-      }
-      const accessToken = await getAccessToken(id, 'room');
-      this.connection.connect({ roomName: 'room', accessToken });
+      this.connection.connect({ roomName, accessToken });
     } catch (error) {
       alert(error.message);
     }
   };
+
+  // Client Identity for User 1: USER1
+  startCallAsUser1 = () => {
+    const accessToken = '';
+    this.startCall('room', accessToken);
+  }
+
+  // Client Identity for User 2: USER2
+  startCallAsUser2 = () => {
+    const accessToken = '';
+    this.startCall('room', accessToken);
+  }
 
   closeCall = () => {
     this.connection.disconnect();
@@ -170,9 +161,12 @@ export default class App extends Component {
           enabled
           style={styles.selfView}
         />
-        <Button onPress={this.startCall} title="CALL" />
-        <Button onPress={this.closeCall} title="Close" />
-        <Button onPress={this.capture} title="CAPTURE" />
+        <View>
+          <Button onPress={this.startCallAsUser1} title="CALL as User 1" />
+          <Button onPress={this.startCallAsUser2} title="CALL as USer 2" />
+          <Button onPress={this.closeCall} title="Close" />
+          <Button onPress={this.capture} title="CAPTURE" />
+        </View>
         <TwilioVideo
           ref={(video) => { this.connection = video; }}
           onRoomDidConnect={this.handleConnect}
