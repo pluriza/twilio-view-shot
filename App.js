@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { View, ScrollView, Platform, PermissionsAndroid, Button, CameraRoll, Alert } from 'react-native';
+import { View, ScrollView, Platform, PermissionsAndroid, Button, CameraRoll, Alert, Text } from 'react-native';
 import { TwilioVideo, TwilioVideoLocalView, TwilioVideoParticipantView } from 'react-native-twilio-video-webrtc';
 import { captureScreen } from 'react-native-view-shot';
 
@@ -154,6 +154,7 @@ export default class App extends Component {
     const { disconnected, videoTracks } = this.state;
     return (
       <View style={styles.container}>
+        <Text>{`Ready to connect: ${disconnected ? 'No' : 'Yes'}`}</Text>
         <ScrollView
           horizontal
           style={styles.remoteGroup}
