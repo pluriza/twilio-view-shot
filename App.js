@@ -16,8 +16,8 @@ const log = message => (...data) => console.log(message, ...data);
 export default class App extends Component {
 
   state = {
-    // Change to true for the fix
-    disconnected: false, //true,
+    // Uncomment to true for the fix
+    // disconnected: true,
     isAudioEnabled: true,
     isVideoEnabled: true,
     participants: {},
@@ -80,11 +80,12 @@ export default class App extends Component {
 
   // accessToken FROM YOUR TWILIO ACCOUNT https://www.twilio.com/console/video/runtime/testing-tools
   // When creating the access tokens Set Choose your Room Name as room
+  // Uncomment to true for the fix
   startCall = async (roomName, accessToken) => {
-    const { disconnected } = this.state;
-    if (disconnected) {
-      return this.setState({ disconnected: false });
-    }
+    // const { disconnected } = this.state;
+    // if (disconnected) {
+    //   return this.setState({ disconnected: false });
+    // }
     try {
       this.connection.connect({ roomName, accessToken });
     } catch (error) {
@@ -109,9 +110,9 @@ export default class App extends Component {
     // const { disconnected } = this.state;
     // if (!disconnected) {
     this.connection.disconnect();
-    // setTimeout(() => {
-    // this.setState({ disconnected: true })
-    // }, 5000);
+    //   setTimeout(() => {
+    //     this.setState({ disconnected: true })
+    //   }, 5000);
     // }
   }
 
