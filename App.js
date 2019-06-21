@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { StyleSheet, View, ScrollView, Platform, PermissionsAndroid, Button, CameraRoll, Alert } from 'react-native';
+import { View, ScrollView, Platform, PermissionsAndroid, Button, CameraRoll, Alert } from 'react-native';
 import { TwilioVideo, TwilioVideoLocalView, TwilioVideoParticipantView } from 'react-native-twilio-video-webrtc';
 import { captureScreen } from 'react-native-view-shot';
 
@@ -16,6 +16,8 @@ const log = message => (...data) => console.log(message, ...data);
 export default class App extends Component {
 
   state = {
+    // Change to true for the fix
+    disconnected: false, //true,
     isAudioEnabled: true,
     isVideoEnabled: true,
     participants: {},
@@ -79,6 +81,10 @@ export default class App extends Component {
   // accessToken FROM YOUR TWILIO ACCOUNT https://www.twilio.com/console/video/runtime/testing-tools
   // When creating the access tokens Set Choose your Room Name as room
   startCall = async (roomName, accessToken) => {
+    const { disconnected } = this.state;
+    if (disconnected) {
+      return this.setState({ disconnected: false });
+    }
     try {
       this.connection.connect({ roomName, accessToken });
     } catch (error) {
@@ -98,8 +104,15 @@ export default class App extends Component {
     this.startCall('room', accessToken);
   }
 
+  /** Uncomment the following lines for the fix */
   closeCall = () => {
+    // const { disconnected } = this.state;
+    // if (!disconnected) {
     this.connection.disconnect();
+    // setTimeout(() => {
+    // this.setState({ disconnected: true })
+    // }, 5000);
+    // }
   }
 
   capture = async () => {
@@ -138,7 +151,7 @@ export default class App extends Component {
   };
 
   render() {
-    const { videoTracks } = this.state;
+    const { disconnected, videoTracks } = this.state;
     return (
       <View style={styles.container}>
         <ScrollView
@@ -161,62 +174,23 @@ export default class App extends Component {
           enabled
           style={styles.selfView}
         />
-        <View>
+        <View style={styles.buttons}>
           <Button onPress={this.startCallAsUser1} title="CALL as User 1" />
           <Button onPress={this.startCallAsUser2} title="CALL as USer 2" />
+        </View>
+        <View style={styles.buttons}>
           <Button onPress={this.closeCall} title="Close" />
           <Button onPress={this.capture} title="CAPTURE" />
         </View>
-        <TwilioVideo
+        {disconnected ? null : <TwilioVideo
           ref={(video) => { this.connection = video; }}
           onRoomDidConnect={this.handleConnect}
           onRoomDidDisconnect={this.handleDisconnect}
           onRoomDidFailToConnect={this.handleFailToConnect}
           onParticipantAddedVideoTrack={this.handleParticipantConnected}
           onParticipantRemovedVideoTrack={this.handleParticipantDisconnected}
-        />
+        />}
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-    borderWidth: 1,
-    borderColor: 'green',
-  },
-  selfView: {
-    width: 200,
-    height: 200,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'red',
-  },
-  remoteGroup: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    borderWidth: 1,
-    borderColor: 'blue',
-  },
-  remoteViewOverlay: {
-    width: 200,
-    height: 200,
-    backgroundColor: 'white',
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'black',
-  },
-  remoteView: {
-    width: 200,
-    height: 200,
-    borderWidth: 1,
-    borderColor: 'purple',
-  }
-});
